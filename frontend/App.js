@@ -36,7 +36,7 @@ const ParentRender = ({item}) => {
 }
 
 const BigList = () => {
-  const f1 = <FlatList data={['a','b','c']} renderItem={ChildRender}/>
+  const f1 = <FlatList style={styles.item} data={['a','b','c']} renderItem={ChildRender}/>
   const f2 = <FlatList data={['d','e','f']} renderItem={ChildRender} />
   const f3 = <FlatList data={[f1,f2]} renderItem={ParentRender} />
   return f3;
@@ -44,12 +44,13 @@ const BigList = () => {
 
 const App = () => {
   return (
-    <View className="App" style={{marginLeft: 80, marginTop: 50}}>
-      <Text>Welcome back, Chief!</Text>
+    <View className="App" style={{marginLeft: 80, marginTop: 50, marginRight:80}}>
+      <Text style={styles.title}>Welcome back, Chief!</Text><br/>
       <Text style={styles.container}>Please enter the desired maximum range in kilometers. <br/>
         This will be used to select the partners of our company falling in this range,
         and only display the in-range offices of the former.
       </Text>
+      <br/><br/>
       <Input/>
     </View>
   );
@@ -57,11 +58,18 @@ const App = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    // flex: 1,
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
+    fontSize:20
   },
+  title:{
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize:36
+  }
 });
 
 const styles2 = StyleSheet.create({
@@ -72,7 +80,7 @@ const styles2 = StyleSheet.create({
     paddingHorizontal: 20
   },
   item: {
-    marginLeft: 20,
+    marginLeft: 40,
     marginTop: 20,
     padding: 30,
     backgroundColor: '#ffc600',

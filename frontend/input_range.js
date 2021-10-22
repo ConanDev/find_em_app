@@ -1,43 +1,41 @@
 import React, {useState} from 'react';
-import { Text, FlatList, View, TextInput, Button } from 'react-native';
+import { Text, FlatList, StyleSheet, View, TextInput, Button } from 'react-native';
 
 //FRONTEND VERSION
 export default function Input(){ //added default
-    //?don't need a state for inputRange because of <TextInput>
     const [inRangePartners, setInRangePartners] = useState([])
     let inputRange = 0
-    const DescribeObject = (ob) => {
-        //prints keys and values of object ob
-        console.log("Running description:")
-        Object.keys(ob).forEach(key =>{
-            console.log(key + " => " + ob[key])
-        })
-    }
-
-    // const MainListKeyExtractor = ({item, index}) => {
-    //     //didn't solve the warning
-    //     return item.organization + index.toString();
-    // }
-    
 
     const renderPartner = ({item}) => {
-        console.log("renderPartner:")
-        console.log(item)
         return(
             DisplayPartner(item)
         )
     }
 
+    const MainHeader = () => {
+        return (
+            <View>
+                <Text style={styles.mainHeader}>Companies in-range:</Text>
+                <br/>
+            </View>
+        )
+    }
+
+    const EmptyHeader = () => {
+        return <View></View>
+    }
+    
+
     return(
         <View>
             <TextInput placeholder="Enter Range (Km)" onChange={OnChangeHandle} />
+            <br/>
             <Button onPress={() => OnButtonClicked()} title="Display"/>
             <br/>
+
             <FlatList data={inRangePartners}
-                // keyExtractor={MainListKeyExtractor}
-                // renderItem={({item})=>{<Text>{item}</Text>}}>
-                renderItem={renderPartner}>
-                    
+                renderItem={renderPartner}
+                ListHeaderComponent={inRangePartners.length > 0 ? MainHeader : EmptyHeader}>
             </FlatList>
         </View>
     ); //hello
@@ -48,8 +46,7 @@ export default function Input(){ //added default
     }
 
     function OnButtonClicked() {
-        console.log("Button was clicked")
-        const url = "/api/fetchData" //* don't need to send data here (as a route inside url)
+        const url = "/api/fetchData"
         const apiPort = 9000
         let validPartners = null
         //*<newCode>
@@ -66,7 +63,6 @@ export default function Input(){ //added default
             })
             .then((res) => {
                 res.json().then((res) => {
-                        console.log(res)
                         //*res: object with keys: data (partners data) and confirmation (success or fail)
 
                         validPartners = res.data
@@ -75,13 +71,11 @@ export default function Input(){ //added default
                         setInRangePartners(vpObject)
                     })
                     .catch(err => {
-                        console.log("Error in receiving response from server:\n" + err)
+                        console.log("Error in receiving response from server, or parsing data at client:\n" + err)
                     })
 
             })
     }
-   
-
     
     function DisplayPartner(partner){
         //displays Partner company name, location(s) and address(es)
@@ -91,29 +85,13 @@ export default function Input(){ //added default
         //company name
         // for each office:
         //  office#, address
-        /**
-         * 
-         * Finally I have found it!
-
-        The First FlatList you import from react-native
-
-        import {FlatList} from 'react-native'
-        And the second (inside-FlatList) you can import from react-native-gesture-handler
-
-        import {FlatList as FlatList2} from 'react-native-gesture-handler'
-        Then you can use the same orientation and it will work.
-         */
-        //TODO: Indentation
+        
         const SingleCompany = (props) =>{
-            const companyName = <Text>{props.partner.organization}</Text> //header style
-            //?when logging object inside a string, output would be [object Object]
-            console.log("In SG:")
-            console.log("props.branches:")
-            console.log(props.partner.branches)
-            console.log("props.partner: " + props.partner)
+            const companyName = <Text style={styles.companyName}>{props.partner.organization}</Text> //header style
             const list = <FlatList 
                 data={props.partner.branches}
-                renderItem={BranchRender} />
+                renderItem={BranchRender} 
+                style={styles.item}/>
             return (
                 <View>
                     {companyName}
@@ -123,42 +101,66 @@ export default function Input(){ //added default
         }
 
         const BranchRender = ({item, index}) => {
-            //?hehe, turns out you are forced to call the parameter "item"!
             return(
                 <View>
-                    <Text>Office #{index+1}</Text>
+                    <Text style={styles.office}>Office #{index+1}</Text>
                     <FlatList 
                     data={[item.location, item.address]} 
-                    renderItem={BranchDataRender}/>
+                    renderItem={BranchDataRender}
+                    style={styles.officeData}/>
                 </View>
             )
         }
 
         const BranchDataRender = ({item, index}) => {
-            //?same issue. must called it "item" and not something else
-            return <Text>{index === 0 ? "Location: " : "Address: "}{item}</Text>
+            return <Text style={styles.item}>{index === 0 ? "Location: " : "Address: "}{item}</Text>
         }
         
-        return(//all was rapped inside a <li> -- used View instead
+        return(
             <SingleCompany partner={partner} />
         );
     }
 }
 
-// return(//all was rapped inside a <li> -- used View instead
-//     <View>
-//         <Text >{partner.organization}</Text>{/**header */}
-//         <FlatList>
-//             {partner.branches.map((branch, index) => {
-//                 return(//must label out-of-range office!
-//                 <li>Office #{index+1}
-//                 <ul>
-//                     <li>Location: {branch.location}</li>
-//                     <li>Address: {branch.address}</li>
-//                 </ul>
-//                 </li>
-//                 );
-//             })}
-//         </FlatList>
-//     </View>
-// );
+const fontRatio = 0.8
+const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: '#fff',
+      paddingTop: 40,
+      paddingHorizontal: 20*fontRatio,
+    },
+    item: {
+      marginLeft: 20,
+      marginTop: 20,
+      padding: 0,
+      fontSize: 24*fontRatio,
+    },
+    companyName:{
+        marginLeft: 20,
+        marginBottom: -10,
+        marginTop: 50,
+        padding: 0,
+        fontSize: 48*fontRatio,
+    },
+    office:{
+        marginLeft: 30,
+        marginTop: 30,
+        marginBottom: -20,
+        padding: 0,
+        fontSize: 28*fontRatio,
+        textDecorationLine: 'underline'
+    },
+    officeData: {
+      marginLeft: 30,
+      marginTop: 20,
+      padding: 0,
+      fontSize: 24*fontRatio,
+    },
+    mainHeader: {
+        marginLeft: 15,
+        marginTop: 20,
+        padding: 0,
+        fontSize: 30*fontRatio,
+      }
+    });
